@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile - StudyFlow</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #edf2f4;
+      color: #344e41;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-theme {
+      background-color: #0b132b;
+      color: #fff;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 50px;
+      background-color: #344e41;
+      color: #edf2f4;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100vw;
+      left: 0;
+      right: 0;
+    }
+    body.dark-theme .navbar {
+      background-color: #1c2541;
+      color: #fff;
+    }
+    .navbar .logo {
+      color: #edf2f4;
+      font-weight: 600;
+      font-size: 1.2rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: #edf2f4;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      font-size: 1rem;
+    }
+    .nav-links a:hover {
+      color: #8d99ae;
+    }
+    @media (max-width: 700px) {
+      .navbar { padding: 15px 20px; }
+      .nav-links { gap: 10px; }
+    }
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(52, 78, 65, 0.08);
+      padding: 40px 30px;
+    }
+    .profile-card {
+      background: #fff;
+      padding: 30px 30px 20px 30px;
+      border-radius: 16px;
+      max-width: 500px;
+      margin: 40px auto;
+      box-shadow: 0 5px 20px rgba(52, 78, 65, 0.08);
+      color: #344e41;
+      border: 1px solid #8d99ae22;
+    }
+    body.dark-theme .profile-card {
+      background: #3a506b;
+      color: #fff;
+      border: 1px solid #1c2541;
+    }
+    h2 {
+      color: #344e41;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    body.dark-theme h2 {
+      color: #fff;
+    }
+    label {
+      color: #344e41;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+    }
+    body.dark-theme label {
+      color: #fff;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0 20px 0;
+      background: #edf2f4;
+      border: 1px solid #8d99ae;
+      border-radius: 8px;
+      color: #344e41;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    body.dark-theme input, body.dark-theme textarea {
+      background: #3a506b;
+      color: #fff;
+      border: 1px solid #1c2541;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #344e41;
+      background: #fff;
+    }
+    body.dark-theme input:focus, body.dark-theme textarea:focus {
+      border-color: #fff;
+      background: #1c2541;
+    }
+    button {
+      padding: 12px 28px;
+      background: linear-gradient(to right, #344e41, #8d99ae);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+    button:hover {
+      background: #344e41;
+      color: #edf2f4;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 78, 65, 0.12);
+    }
+    body.dark-theme button {
+      background: #1c2541;
+      color: #fff;
+      border: 1px solid #3a506b;
+    }
+    body.dark-theme button:hover {
+      background: #3a506b;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar (matching quiz.html style) -->
+  <nav class="navbar">
+    <a href="home.html" class="logo" style="text-decoration:none;cursor:pointer;">StudyFlow</a>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="plan.html">Study Plan</a>
+      <a href="quiz.html">Quiz</a>
+      <a href="history.html">History</a>
+      <a href="profile.html" style="font-weight:600;">Profile</a>
+      <a href="#" class="menu-item" onclick="logout(); return false;">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="profile-card">
+    <h2>Edit Profile</h2>
+
+    <label>Username:</label>
+    <input type="text" id="edit-username">
+
+    <label>Preferred Study Hours per Day:</label>
+    <input type="text" id="study-hours">
+
+    <button onclick="saveProfile()">Save Profile</button>
+  </div>
+
+  <script>
+    // Load current username from localStorage into input field
+    document.getElementById('edit-username').value = localStorage.getItem("username") || "";
+
+    // Save profile changes to localStorage
+    function saveProfile() {
+      const username = document.getElementById('edit-username').value;
+      const hours = document.getElementById('study-hours').value;
+
+      // Save username and study hours if provided
+      if (username) {
+        localStorage.setItem("username", username);
+      }
+      if (hours) {
+        localStorage.setItem("studyHours", hours);
+      }
+
+      alert("Profile updated successfully!");
+      // Redirect back to dashboard
+      window.location.href = "dashboard.html";
+    }
+
+    // Theme logic for all pages: Set dark or light theme based on localStorage
+    (function() {
+      const theme = localStorage.getItem('theme') || 'light';
+      if (theme === 'dark') document.body.classList.add('dark-theme');
+    })();
+
+    // Logout function: clears storage and redirects to index.html, prevents back navigation
+    function logout() {
+      localStorage.clear();
+      sessionStorage && sessionStorage.clear();
+      window.location.replace('index.html');
+    }
+  </script>
+
+</body>
+</html>

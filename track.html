@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Progress Tracker - StudyFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #edf2f4;
+      color: #344e41;
+      overflow-x: hidden;
+      display: flex;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark-theme {
+      background-color: #0b132b;
+      color: #fff;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .task {
+      margin: 10px 0;
+    }
+
+    .progress {
+      margin-top: 20px;
+      height: 20px;
+      background-color: #ddd;
+      border-radius: 10px;
+    }
+
+    body.dark-theme .progress {
+      background-color: #1c2541;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(to right, #344e41, #8d99ae);
+      border-radius: 10px;
+      transition: width 0.3s;
+    }
+
+    body.dark-theme .progress-bar {
+      background: linear-gradient(to right, #0b132b, #3a506b);
+    }
+
+    /* Add dashboard styles */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      transition: all 0.3s ease;
+      padding: 20px;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: #344e41;
+      color: #edf2f4;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      transition: all 0.3s ease;
+      z-index: 100;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-theme .sidebar {
+      background-color: #1c2541;
+      color: #fff;
+    }
+
+    .sidebar-header {
+      padding: 25px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(237, 242, 244, 0.1);
+    }
+
+    body.dark-theme .sidebar-header {
+      background: none;
+    }
+
+    .sidebar-header h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .sidebar-header .toggle-btn {
+      background: none;
+      border: none;
+      color: #edf2f4;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .user-info {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border-bottom: 1px solid rgba(237, 242, 244, 0.1);
+    }
+
+    body.dark-theme .user-info {
+      background: none;
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #8d99ae;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .user-details h4 {
+      font-weight: 500;
+      font-size: 1rem;
+    }
+
+    .user-details p {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    .sidebar-menu {
+      padding: 20px 0;
+    }
+
+    .menu-item {
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: #edf2f4;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    body.dark-theme .menu-item {
+      color: #fff;
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+      background: rgba(141, 153, 174, 0.2);
+    }
+
+    body.dark-theme .menu-item:hover,
+    body.dark-theme .menu-item.active {
+      background: rgba(34, 50, 75, 0.2);
+    }
+
+    .menu-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: linear-gradient(to bottom, #8d99ae, #edf2f4);
+    }
+
+    body.dark-theme .menu-item.active::before {
+      background: linear-gradient(to bottom, #3a506b, #fff);
+    }
+
+    .menu-item i {
+      font-size: 1.2rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .collapsed-sidebar .sidebar {
+      width: 80px;
+    }
+
+    .collapsed-sidebar .sidebar-header h2,
+    .collapsed-sidebar .user-details,
+    .collapsed-sidebar .menu-item span {
+      display: none;
+    }
+
+    .collapsed-sidebar .menu-item {
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .collapsed-sidebar .menu-item i {
+      margin: 0;
+    }
+
+    .collapsed-sidebar .user-info {
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .collapsed-sidebar .main-content {
+      margin-left: 80px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(52, 78, 65, 0.1);
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      color: #344e41;
+      text-align: left;
+    }
+
+    body.dark-theme .header h1 {
+      color: #fff;
+    }
+
+    .mobile-header {
+      display: none;
+      padding: 15px;
+      background-color: #344e41;
+      color: #edf2f4;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 99;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    body.dark-theme .mobile-header {
+      background-color: #1c2541;
+    }
+
+    .mobile-toggle {
+      background: none;
+      border: none;
+      color: #edf2f4;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .tracker-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s;
+    }
+
+    body.dark-theme .tracker-card {
+      background: #3a506b;
+      border: 1px solid #1c2541;
+    }
+
+    .tracker-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .tracker-card h3 {
+      color: #344e41;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+
+    body.dark-theme .tracker-card h3 {
+      color: #fff;
+    }
+
+    .toggle-btn {
+      padding: 8px 15px;
+      background-color: rgba(52, 78, 65, 0.1);
+      color: #344e41;
+      border: none;
+      border-radius: 5px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .toggle-btn:hover {
+      background-color: #344e41;
+      color: #edf2f4;
+    }
+
+    body.dark-theme .toggle-btn {
+      background-color: #1c2541;
+      color: #fff;
+    }
+
+    .task-row {
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .show-sidebar .sidebar {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding-top: 70px;
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 90;
+        display: none;
+      }
+
+      .show-sidebar .sidebar-overlay {
+        display: block;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+    }
+
+    /* Animations */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 1s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth animations for sidebar */
+    .sidebar {
+      transition: width 0.3s ease, transform 0.3s ease;
+    }
+
+    .sidebar-header,
+    .user-info,
+    .user-details,
+    .menu-item,
+    .menu-item span {
+      transition: all 0.3s ease;
+    }
+
+    .user-avatar {
+      transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease;
+    }
+
+    .menu-item:hover {
+      transform: translateX(5px);
+    }
+
+    .menu-item i {
+      transition: margin 0.3s ease, transform 0.3s ease;
+    }
+
+    .menu-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .toggle-btn {
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Enhanced animation for collapsed sidebar */
+    .collapsed-sidebar .toggle-btn {
+      transform: rotate(180deg);
+    }
+
+    .sidebar-overlay {
+      transition: opacity 0.3s ease;
+    }
+
+    /* Mobile sidebar animation */
+    @media (max-width: 992px) {
+      .sidebar {
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar-overlay {
+        opacity: 0;
+        transition: opacity 0.3s ease, display 0.1s ease 0.3s;
+      }
+
+      .show-sidebar .sidebar-overlay {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <button class="mobile-toggle" id="mobileToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+    <h2><a href="home.html" style="color:inherit;text-decoration:none;cursor:pointer;">StudyFlow</a></h2>
+    <div></div> <!-- Empty div for flex spacing -->
+  </div>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2><a href="home.html" style="color:inherit;text-decoration:none;cursor:pointer;">StudyFlow</a></h2>
+      <button class="toggle-btn" id="sidebarToggle">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+    </div>
+    <div class="user-info">
+      <div class="user-avatar">
+        <span>JS</span>
+      </div>
+      <div class="user-details">
+        <h4>John Smith</h4>
+        <p>Student</p>
+      </div>
+    </div>
+    <nav class="sidebar-menu">
+      <a href="dashboard.html" class="menu-item">
+        <i class="fas fa-th-large"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="plan.html" class="menu-item">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Study Plan</span>
+      </a>
+      <a href="quiz.html" class="menu-item">
+        <i class="fas fa-brain"></i>
+        <span>Learning Style Quiz</span>
+      </a>
+      <a href="#" class="menu-item active">
+        <i class="fas fa-chart-line"></i>
+        <span>Progress Tracker</span>
+      </a>
+      <a href="profile.html" class="menu-item">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </a>
+      <a href="settings.html" class="menu-item">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+      </a>
+      <a href="index.html" class="menu-item">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header">
+      <h1>Progress Tracker</h1>
+    </div>
+
+    <div class="tracker-card fade-up">
+      <h2 style="color: #344e41;">Your Study Progress</h2>
+      <div id="tracker" style="display: flex; flex-wrap: wrap; gap: 20px;"></div>
+
+      <div class="progress">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const mobileToggle = document.getElementById('mobileToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const body = document.body;
+
+    // Sidebar toggle
+    sidebarToggle.addEventListener('click', () => {
+      body.classList.toggle('collapsed-sidebar');
+      const icon = sidebarToggle.querySelector('i');
+      icon.classList.toggle('fa-chevron-left');
+      icon.classList.toggle('fa-chevron-right');
+    });
+
+    mobileToggle.addEventListener('click', () => {
+      body.classList.toggle('show-sidebar');
+    });
+
+    sidebarOverlay.addEventListener('click', () => {
+      body.classList.remove('show-sidebar');
+    });
+
+    // 🧠 Logged-in user's email
+    const userEmail = localStorage.getItem("email");
+
+    // 📡 Fetch study plans from MongoDB for this user
+    async function fetchUserPlans() {
+      try {
+        const res = await fetch(`http://localhost:5000/api/get-plans?email=${userEmail}`);
+        const data = await res.json();
+        if (!data?.plans?.length) {
+          document.getElementById("tracker").innerHTML = "<p>No plans found. Please generate one first.</p>";
+          return;
+        }
+        renderPlans(data.plans);
+      } catch (err) {
+        console.error("Error fetching plans:", err);
+      }
+    }
+
+    // 🧾 Render fetched plans and tasks as cards
+    function renderPlans(plans) {
+      const tracker = document.getElementById("tracker");
+      tracker.innerHTML = "";
+
+      let totalTasks = 0;
+      let completedTasks = 0;
+
+      plans.forEach((plan) => {
+        const card = document.createElement("div");
+        card.className = "tracker-card fade-up";
+        card.style.width = "100%";
+
+        const title = document.createElement("h3");
+        title.textContent = `${plan.subject} - ${plan.topic}`;
+        card.appendChild(title);
+
+        const toggle = document.createElement("button");
+        toggle.textContent = "Toggle Tasks";
+        toggle.className = "toggle-btn";
+        toggle.style.marginTop = "10px";
+
+        const taskList = document.createElement("div");
+        taskList.style.marginTop = "15px";
+        taskList.style.display = "none";
+
+        toggle.onclick = () => {
+          taskList.style.display = taskList.style.display === "none" ? "block" : "none";
+        };
+
+        plan.tasks.forEach((task, index) => {
+          totalTasks++;
+          if (task.completed) completedTasks++;
+
+          const row = document.createElement("div");
+          row.className = "task-row";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = task.completed;
+          checkbox.dataset.planId = plan._id;
+          checkbox.dataset.taskIndex = index;
+
+          checkbox.addEventListener("change", () => {
+            updateTaskCompletion(plan._id, index, checkbox.checked);
+          });
+
+          const label = document.createElement("label");
+          label.textContent = task.task;
+          label.style.marginLeft = "10px";
+
+          row.appendChild(checkbox);
+          row.appendChild(label);
+          taskList.appendChild(row);
+        });
+
+        card.appendChild(toggle);
+        card.appendChild(taskList);
+        tracker.appendChild(card);
+      });
+
+      // ✅ Update progress bar
+      const percent = totalTasks ? (completedTasks / totalTasks) * 100 : 0;
+      document.getElementById('progress-bar').style.width = `${percent}%`;
+    }
+
+    // 🔄 Update task completion status in MongoDB
+    async function updateTaskCompletion(planId, taskIndex, completed) {
+      try {
+        const res = await fetch("http://localhost:5000/api/update-progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: userEmail, planId, taskIndex, completed })
+        });
+
+        if (!res.ok) {
+          console.error("❌ Failed to update task progress");
+        } else {
+          fetchUserPlans(); // 🔁 Refresh after update
+        }
+      } catch (err) {
+        console.error("Error updating progress:", err);
+      }
+    }
+
+    // 👤 Update sidebar user info
+    document.addEventListener('DOMContentLoaded', () => {
+      const username = localStorage.getItem('username') || 'User';
+      const role = localStorage.getItem('role') || 'Student';
+
+      const userDetails = document.querySelector('.user-details');
+      if (userDetails) {
+        userDetails.innerHTML = `<h4>${username}</h4><p>${role}</p>`;
+      }
+
+      const avatar = document.querySelector('.user-avatar span');
+      if (avatar && username) {
+        const initials = username.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        avatar.textContent = initials;
+      }
+    });
+
+    // 🔒 Logout
+    document.getElementById('logoutSidebar').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.href = 'index.html';
+    });
+
+    // 🌓 Theme
+    (function () {
+      const theme = localStorage.getItem('theme') || 'light';
+      if (theme === 'dark') document.body.classList.add('dark-theme');
+    })();
+
+    // 🚀 Start rendering on load
+    window.onload = fetchUserPlans;
+  </script>
+
+</body>
+
+</html>

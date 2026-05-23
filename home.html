@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyFlow - Smart Study Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background-color: #edf2f4; color: #344e41; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+    body.dark-theme {
+      background-color: #0b132b;
+      color: #fff;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 50px;
+      background-color: #344e41;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    body.dark-theme .navbar {
+      background-color: #1c2541;
+    }
+
+    .navbar .logo {
+      color: #edf2f4;
+      font-weight: 600;
+      font-size: 1.2rem;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: #edf2f4;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #8d99ae;
+    }
+
+    .login-btn {
+      background-color: transparent;
+      color: #edf2f4;
+      border: 2px solid #8d99ae;
+      padding: 8px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background-color: #8d99ae;
+      transition: all 0.3s ease;
+      z-index: -1;
+    }
+
+    .login-btn:hover::before {
+      width: 100%;
+    }
+
+    .login-btn:hover {
+      color: #344e41;
+    }
+
+    header {
+      padding: 40px 20px;
+      text-align: center;
+      background: linear-gradient(to right, #344e41, #8d99ae);
+      color: #edf2f4;
+    }
+    body.dark-theme header {
+      background: linear-gradient(to right, #0b132b, #1c2541);
+    }
+    header h1 { font-size: 3em; margin-bottom: 10px; }
+    header p { font-size: 1.2em; opacity: 0.9; }
+    header button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-weight: bold;
+      background: #edf2f4;
+      color: #344e41;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    header button:hover { 
+      background: #fff; 
+      transform: scale(1.05);
+    }
+
+    section { padding: 60px 20px; text-align: center; }
+    .features, .future-enhancements {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 40px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .about {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(200px, 300px));
+      gap: 30px;
+      margin-top: 40px;
+      justify-content: center;
+    }
+
+    .card {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      transition: transform 0.3s ease, box-shadow 0.3s;
+      border: 1px solid rgba(141, 153, 174, 0.2);
+    }
+    body.dark-theme .card {
+      background-color: #3a506b;
+      color: #fff;
+      border: 1px solid #1c2541;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 20px rgba(52, 78, 65, 0.2);
+    }
+
+    .card h3 {
+      color: #344e41;
+      margin-bottom: 15px;
+    }
+    .card p {
+      color: #8d99ae;
+      font-size: 0.95em;
+    }
+    
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      display: inline-block;
+      transition: transform 0.5s ease;
+    }
+    
+    .card:hover .feature-icon {
+      transform: rotate(360deg) scale(1.2);
+    }
+
+    footer {
+      padding: 30px;
+      background-color: #344e41;
+      text-align: center;
+      color: #edf2f4;
+      font-size: 0.9em;
+    }
+    body.dark-theme footer {
+      background-color: #1c2541;
+    }
+
+    footer a {
+      color: #8d99ae;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    footer a:hover {
+      color: #edf2f4;
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 1s ease forwards;
+    }
+    .fade-delay-1 { animation-delay: 0.3s; }
+    .fade-delay-2 { animation-delay: 0.6s; }
+    .fade-delay-3 { animation-delay: 0.9s; }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @media (max-width: 900px) {
+      .features, .future-enhancements {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .features, .future-enhancements {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .about-card {
+      padding: 25px;
+    }
+
+    section h2 {
+      position: relative;
+      display: inline-block;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    section h2::after {
+      content: '';
+      position: absolute;
+      width: 60%;
+      height: 3px;
+      bottom: 0;
+      left: 20%;
+      background: linear-gradient(to right, #344e41, #8d99ae);
+      border-radius: 10px;
+      transform: scaleX(0);
+      transform-origin: bottom right;
+      transition: transform 0.6s ease-out;
+      animation: underlineAppear 1s ease forwards 0.5s;
+    }
+
+    @keyframes underlineAppear {
+      to { 
+        transform: scaleX(1);
+        transform-origin: bottom left;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 15px 20px;
+      }
+      
+      .nav-links {
+        gap: 15px;
+      }
+      
+      .login-btn {
+        padding: 6px 15px;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .nav-links {
+        margin: 10px 0;
+      }
+    }
+
+    .feature-link {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 8px 15px;
+      background-color: #344e41;
+      color: #edf2f4;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .feature-link:hover {
+      background-color: #8d99ae;
+      transform: translateY(-2px);
+    }
+    body.dark-theme .feature-link {
+      background-color: #1c2541;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="home.html" class="logo" style="text-decoration:none;cursor:pointer;">StudyFlow</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#future">Future</a>
+      <a href="#about">About</a>
+    </div>
+    <button class="login-btn" onclick="location.href='index.html'">Login</button>
+  </nav>
+
+  <header>
+    <h1 class="fade-up">StudyFlow</h1>
+    <p class="fade-up fade-delay-1">Your Personalized AI-Powered Study Planner</p>
+    <button class="fade-up fade-delay-2" onclick="location.href='index.html'">Get Started</button>
+  </header>
+
+  <section id="features">
+    <h2 class="fade-up">🚀 Features</h2>
+    <div class="features">
+      <div class="card fade-up fade-delay-1">
+        <span class="feature-icon">📋</span>
+        <h3>Personalized Study Plans</h3>
+        <p>AI-generated schedules tailored to your learning style and goals.</p>
+        <a href="Features/personalized-plans.html" class="feature-link">Learn More</a>
+      </div>
+      <div class="card fade-up fade-delay-2">
+        <span class="feature-icon">🧠</span>
+        <h3>Learning Style Quiz</h3>
+        <p>Identify your ideal learning style using the VARK-based quiz module.</p>
+        <a href="Features/learning-style-quiz.html" class="feature-link">Learn More</a>
+      </div>
+      <div class="card fade-up fade-delay-3">
+        <span class="feature-icon">📚</span>
+        <h3>Study Plan Archives</h3>
+        <p>Access your past study plans and track your progress.</p>
+        <a href="Features/study-plan-archive.html" class="feature-link">Learn More</a>
+      </div>
+      <div class="card fade-up fade-delay-1">
+        <span class="feature-icon">📅</span>
+        <h3>Calendar Integration</h3>
+        <p>View study schedule in a calendar format and plan your study sessions effectively.</p>
+        <a href="Features/calendar-integration.html" class="feature-link">Learn More</a>
+      </div>
+      <div class="card fade-up fade-delay-2">
+        <span class="feature-icon">🔒</span>
+        <h3>Secure User Accounts</h3>
+        <p>Create your personal account with secure authentication to save your learning preferences.</p>
+        <a href="Features/secure-accounts.html" class="feature-link">Learn More</a>
+      </div>
+      <div class="card fade-up fade-delay-3">
+        <span class="feature-icon">📱</span>
+        <h3>Responsive Design</h3>
+        <p>Access StudyFlow on any device with our fully responsive and user-friendly interface.</p>
+        <a href="Features/responsive-design.html" class="feature-link">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="future">
+    <h2 class="fade-up">🔮 Future Enhancements</h2>
+    <div class="future-enhancements">
+      <div class="card fade-up fade-delay-1">
+        <span class="feature-icon">🤖</span>
+        <h3>AI-Powered Recommendations</h3>
+        <p>Advanced AI algorithms to provide even more personalized study recommendations based on your progress.</p>
+      </div>
+      <div class="card fade-up fade-delay-2">
+        <span class="feature-icon">🔔</span>
+        <h3>Smart Notifications</h3>
+        <p>Timely reminders and notifications to keep you on track with your study schedule.</p>
+      </div>
+      <div class="card fade-up fade-delay-3">
+        <span class="feature-icon">👥</span>
+        <h3>Study Groups</h3>
+        <p>Connect with peers who share similar subjects or learning styles for collaborative studying.</p>
+      </div>
+      <div class="card fade-up fade-delay-1">
+        <span class="feature-icon">📚</span>
+        <h3>Resource Library</h3>
+        <p>Access to curated study materials tailored to your learning style and subjects.</p>
+      </div>
+      <div class="card fade-up fade-delay-2">
+        <span class="feature-icon">🎓</span>
+        <h3>Personalized AI Feedback</h3>
+        <p>Get intelligent feedback on your study habits and personalized tips to improve your learning efficiency.</p>
+      </div>
+      <div class="card fade-up fade-delay-3">
+        <span class="feature-icon">📋</span>
+        <h3>Editable Plans & Task Reordering</h3>
+        <p>Easily reorganize and modify your study tasks with drag-and-drop functionality and quick editing tools.</p>
+      </div>
+      <div class="card fade-up fade-delay-1">
+        <span class="feature-icon">🎯</span>
+        <h3>Goal-Based Planning</h3>
+        <p>Set specific academic goals and let StudyFlow create customized study plans to help you achieve them.</p>
+      </div>
+      <div class="card fade-up fade-delay-2">
+        <span class="feature-icon">👨‍🏫</span>
+        <h3>Mentor Mode</h3>
+        <p>Add a "Mentor" panel where teachers can assign goals to students.</p>
+      </div>
+      <div class="card fade-up fade-delay-3">
+        <span class="feature-icon">🎤</span>
+        <h3>Voice-Controlled Study Plan</h3>
+        <p>Create and modify your study plans using voice commands for a hands-free experience.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div id="about" class="fade-up">
+      <h2>About Us</h2> <br>
+      <p style="text-align: center; max-width: 800px; margin: 0 auto 40px; line-height: 1.7;">
+        StudyFlow was created by a team of passionate student who believe in the power of personalized learning. 
+        Our mission is to help student maximize their study efficiency by providing tools that adapt to individual learning preferences.
+      </p>
+      
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>© 2025 StudyFlow. All rights reserved.</p>
+      <p>Contact us at: <a href="mailto:info@studyflow.com">info@studyflow.com</a></p>
+    </div>
+  </footer>
+
+  <script>
+  // Theme logic for all pages
+  (function() {
+    const theme = localStorage.getItem('theme') || 'light';
+    if (theme === 'dark') document.body.classList.add('dark-theme');
+  })();
+
+  // Prevent going forward to restricted pages
+    window.onpageshow = function(event) {
+      if (event.persisted) {
+        window.location.reload(); // Forces session check again
+      }
+    };
+
+  </script>
+</body>
+</html>

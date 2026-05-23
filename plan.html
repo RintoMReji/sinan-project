@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Plan Generator - StudyFlow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background-color: #edf2f4; color: #344e41; }
+    
+    /* --- FIX IS HERE: Navbar and Logo Styles --- */
+    .navbar { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 15px 50px; 
+        background-color: #344e41; /* Dark Green Background */
+        color: #edf2f4; 
+    }
+    
+    /* FIX: Style the logo as text, not a link */
+    .navbar .logo {
+        color: #fff; /* Force white color */
+        font-weight: 600;
+        font-size: 1.2rem;
+        cursor: default; /* Change cursor to default to show it's not clickable */
+    }
+    
+    .nav-links a { 
+        color: #edf2f4; 
+        text-decoration: none; 
+        margin-left: 20px; 
+        padding: 5px 10px; 
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        position: relative;
+    }
+    
+    /* Style for the active link (the page you are on) */
+    .nav-links a[style*="font-weight:600"] {
+        background-color: transparent; /* No Green Background */
+        color: #fff !important; 
+        text-decoration: none; 
+        font-weight: 700 !important; 
+    }
+
+    /* Adding a simple white marker effect (similar to your original) */
+    .nav-links a[style*="font-weight:600"]::after {
+        content: '';
+        position: absolute;
+        bottom: -5px; 
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        height: 3px;
+        background-color: #fff; 
+        border-radius: 2px;
+    }
+    /* --- END OF FIX --- */
+
+    .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 16px; padding: 40px 30px; }
+    h1 { text-align: center; margin-bottom: 35px; color: #344e41; }
+    label { font-weight: 500; margin-bottom: 8px; display: block; }
+    input, textarea { width: 100%; padding: 12px 15px; border: 1px solid #8d99ae; border-radius: 8px; font-size: 1rem; margin-bottom: 20px; }
+    button { background: #344e41; color: #fff; border: none; padding: 12px 28px; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+    #plan-output { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <!-- FIX IS HERE: Changed <a> tag to a <span> tag -->
+    <span class="logo">StudyFlow</span>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="plan.html" style="font-weight:600;">Study Plan</a>
+      <a href="quiz.html">Quiz</a>
+      <a href="history.html">History</a>
+      <a href="profile.html">Profile</a>
+      <a href="#" onclick="logout(); return false;">Logout</a>
+    </div>
+  </nav>
+  <div class="container">
+    <h1>📅 AI Content Generator</h1>
+    <form id="plan-form">
+      <label>Your Learning Style:</label>
+      <input type="text" id="learningStyle" readonly>
+      <label>Subjects (comma separated):</label>
+      <input type="text" id="subjects" placeholder="e.g. Math, English, DSA">
+      <label>Topic:</label>
+      <input type="text" id="topic" placeholder="e.g. Algebra, Grammar">
+      <label>Grade/Level:</label>
+      <input type="text" id="grade" placeholder="e.g. 10th grade, Undergraduate">
+      <label>Daily Study Duration (for plans only):</label>
+      <input type="text" id="duration" placeholder="e.g. 2 hours">
+      <label>Learning Objectives (for plans only):</label>
+      <textarea id="objectives" placeholder="e.g. Master linear equations"></textarea>  
+      <button type="submit" id="generate-btn">Generate Study Plan</button>   
+      <button type="button" id="explain-btn" style="background: #3498db; margin-left: 10px;">Explain Topic</button>   
+      <button type="button" id="quiz-btn" style="background: #27ae60; margin-left: 10px;">Generate a Quiz</button>   
+    </form>
+    <div id="plan-output"></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!localStorage.getItem('username')) window.location.replace('index.html');
+      document.getElementById('learningStyle').value = localStorage.getItem("learningStyle") || "Not set";
+      document.getElementById('plan-form').addEventListener('submit', handleGeneratePlan);
+      document.getElementById('explain-btn').addEventListener('click', handleExplainTopic);
+      document.getElementById('quiz-btn').addEventListener('click', handleGenerateQuiz);
+    });
+
+    async function handleGeneratePlan(e) {
+      e.preventDefault();
+      const email = localStorage.getItem("email");
+      const subjects = document.getElementById('subjects').value.trim();
+      const topic = document.getElementById('topic').value.trim();
+      const grade = document.getElementById('grade').value;
+      const duration = document.getElementById('duration').value;
+      const objectives = document.getElementById('objectives').value;
+  
+      if (!subjects || !topic || !grade || !duration || !objectives) {
+        alert("Please fill all fields to generate a plan.");
+        return;
+      }
+  
+      const outputDiv = document.getElementById('plan-output');
+      outputDiv.innerHTML = '<h3>Generating your study plan...</h3>';
+
+      try {
+        const response = await fetch('http://localhost:5000/api/generate-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject: subjects, topic: topic, grade: grade, duration: duration, objectives: objectives, customization: `Learning Style: ${localStorage.getItem("learningStyle")}` })
+        });
+        const data = await response.json();
+        if (data.plan_md) {
+          const planText = data.plan_md;
+          outputDiv.innerHTML = `<h3>Your AI-Generated Study Plan:</h3><div style="line-height: 1.8;">${marked.parse(planText)}</div>`;
+          const confirmSave = confirm("Do you want to save this plan to your history?");
+          if (confirmSave) {
+            await fetch('http://localhost:5000/api/save-history', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, subject: subjects, topic: topic, plan_md: planText, type: 'Plan' })
+            });
+          }
+        } else {
+          const errorMessage = data.message || "Failed to generate plan.";
+          outputDiv.innerText = `❌ ${errorMessage}`;
+        }
+      } catch (err) {
+        outputDiv.innerText = "❌ Server error. Could not connect.";
+      }
+    }
+
+    async function handleExplainTopic() {
+      const email = localStorage.getItem("email");
+      const subjects = document.getElementById('subjects').value.trim();
+      const topic = document.getElementById('topic').value.trim();
+      const grade = document.getElementById('grade').value;
+
+      if (!subjects || !topic || !grade) {
+          alert("Please fill in Subjects, Topic, and Grade for an explanation.");
+          return;
+      }
+      const outputDiv = document.getElementById('plan-output');
+      outputDiv.innerHTML = '<h3>Generating an explanation...</h3>';
+      try {
+        const response = await fetch('http://localhost:5000/api/explain-topic', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subject: subjects, topic: topic, grade: grade, customization: `Learning Style: ${localStorage.getItem("learningStyle")}` })
+        });
+        const data = await response.json();
+        if (data.explanation_md) {
+            const explanationText = data.explanation_md;
+            outputDiv.innerHTML = `<h3>AI-Generated Explanation:</h3><div style="line-height: 1.8;">${marked.parse(explanationText)}</div>`;
+            const confirmSave = confirm("Do you want to save this explanation to your history?");
+            if (confirmSave) {
+              await fetch('http://localhost:5000/api/save-history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, subject: subjects, topic: topic, plan_md: explanationText, type: 'Explanation' })
+              });
+            }
+        } else {
+            outputDiv.innerText = "❌ " + (data.message || "Failed to generate explanation.");
+        }
+      } catch (err) {
+        outputDiv.innerText = "❌ Server error. Could not connect.";
+      }
+    }
+
+    async function handleGenerateQuiz() {
+        const email = localStorage.getItem("email");
+        const subjects = document.getElementById('subjects').value.trim();
+        const topic = document.getElementById('topic').value.trim();
+        const grade = document.getElementById('grade').value;
+
+        if (!subjects || !topic || !grade) {
+            alert("Please fill in Subjects, Topic, and Grade to generate a quiz.");
+            return;
+        }
+        const outputDiv = document.getElementById('plan-output');
+        outputDiv.innerHTML = '<h3>Generating your quiz...</h3>';
+        try {
+            const response = await fetch('http://localhost:5000/api/generate-quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subject: subjects, topic: topic, grade: grade })
+            });
+            const data = await response.json();
+            if (data.quiz_md) {
+                const quizText = data.quiz_md;
+                outputDiv.innerHTML = `<h3>AI-Generated Quiz:</h3><div style="line-height: 1.8;">${marked.parse(quizText)}</div>`;
+                const confirmSave = confirm("Do you want to save this quiz to your history?");
+                if (confirmSave) {
+                  await fetch('http://localhost:5000/api/save-history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, subject: subjects, topic: topic, plan_md: quizText, type: 'Quiz' })
+                  });
+                }
+            } else {
+                outputDiv.innerText = "❌ " + (data.message || "Failed to generate quiz.");
+            }
+        } catch (err) {
+            outputDiv.innerText = "❌ Server error. Could not connect."
+        }
+    }
+
+    function logout() {
+      localStorage.clear();
+      sessionStorage && sessionStorage.clear();
+      window.location.replace('index.html');
+    }
+  </script>
+</body>
+</html>
